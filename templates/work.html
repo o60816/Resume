@@ -1,21 +1,27 @@
 <!--menu.html-->
 {{range .works}}
-<div class="row">
+<div class="work">
+  <div class="row">
     <div class="col-sm-6">
-        <p>
-            {{.Period}}
-            {{.Company}}
-            {{.Position}}
-            {{.Content}}
-            {{range .ProjectList}}
-            <p>專案：</p>
-            <br>
-            {{.ProjectName}}
-            <p>技術：</p>
-            <br>
-            {{.Tech}}
-            {{end}}
-        </p>
+      <h3>
+        <span style="color: rgb(27, 131, 223); font-size: 24px;">{{.Company}}</span>
+        <img width="60" height="60" style="float:right" data-no-retina="true" src={{.Logo}} alt="logo.png">
+      </h3>
+      <h3>
+        <span style="font-size: 16px; color: inherit; letter-spacing: 0px;">{{.Period}}</span>
+      </h3>
+      <span style="font-size: 18px;">{{.Position}}</span>
+      <br>
+      <span style="font-size: 18px;">{{.Content}}</span>
     </div>
+    <div class="col-sm-6">
+        {{range .ProjectList}}
+        <p>專案：</p>
+        <p>{{.ProjectName}}</p>
+        <p>技術：</p>
+        <p>{{.Tech}}</p>
+        {{end}}
+    </div>
+  </div>
 </div>
 {{end}}
