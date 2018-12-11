@@ -4,6 +4,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -95,16 +96,47 @@ func main() {
 		)
 	})
 
-	router.GET("/create", func(c *gin.Context) {
+	router.GET("/work/create", func(c *gin.Context) {
 		c.HTML(
 			http.StatusOK,
 			"addWork.html",
-			gin.H{},
+			gin.H{
+				"method":  "POST",
+				"btnName": "新增",
+			},
 		)
 	})
 
-	router.POST("/create", func(c *gin.Context) {
-		result, err := db.Exec("INSERT INTO work(period, logo, company, position, content) VALUES(?,?,?,?,?)", c.PostForm("period"), c.PostForm("logo"), c.PostForm("company"), c.PostForm("position"), c.PostForm("content"))
+	router.GET("/work/update/:workId", func(c *gin.Context) {
+		rows, err := db.Query("SELECT id, period, logo, company, position, content FROM work WHERE id=?", c.Param("workId"))
+		rows.Next()
+		var work Work
+		rows.Scan(&work.Id, &work.Period, &work.Logo, &work.Company, &work.Position, &work.Content)
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		c.HTML(
+			http.StatusOK,
+			"addWork.html",
+			gin.H{
+				"method":  "PUT",
+				"work":    work,
+				"btnName": "更新",
+			},
+		)
+	})
+
+	var query string
+	router.POST("/work", func(c *gin.Context) {
+		if c.PostForm("_method") == "POST" {
+			query = fmt.Sprintf("INSERT INTO work(period, logo, company, position, content) VALUES(%s,%s,%s,%s,%s)", c.PostForm("period"), c.PostForm("logo"), c.PostForm("company"), c.PostForm("position"), c.PostForm("content"))
+		} else {
+			query = fmt.Sprintf("UPDATE work SET period='%s',logo='%s',company='%s',position='%s',content='%s' WHERE id='%s'", c.PostForm("period"), c.PostForm("logo"), c.PostForm("company"), c.PostForm("position"), c.PostForm("content"), c.PostForm("id"))
+		}
+
+		result, err := db.Exec(query)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -115,10 +147,10 @@ func main() {
 		if rows != 1 {
 			panic(err)
 		}
-		c.Redirect(http.StatusMovedPermanently, "http://localhost:8080/")
+		c.Redirect(http.StatusMovedPermanently, "/")
 	})
 
-	router.GET("/delete/:workId", func(c *gin.Context) {
+	router.DELETE("/work/:workId", func(c *gin.Context) {
 		if workID, err := strconv.Atoi(c.Param("workId")); err == nil {
 			result, err := db.Exec("DELETE FROM work WHERE id=?", workID)
 			if err != nil {
@@ -131,11 +163,10 @@ func main() {
 			if rows != 1 {
 				panic(err)
 			}
+			c.JSON(http.StatusOK, gin.H{"status": "刪除成功"})
 		} else {
 			c.AbortWithStatus(http.StatusNotFound)
 		}
-
-		c.Redirect(http.StatusMovedPermanently, "http://localhost:8080/")
 	})
 
 	router.Run(":8080")
