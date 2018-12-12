@@ -14,11 +14,11 @@
             <form action="/work" method="POST">
                 <input type="hidden" name="_method" value="{{.method}}" />
                 <input type="hidden" name="id" value="{{.work.Id}}" />
-                <div class="form-group" style="width:20%">
+                <div class="form-group">
                     <label for="inputCompany">公司</label>
                     <input type="text" class="form-control" id="inputCompany" name="company" placeholder="公司名稱" value={{.work.Company}}>
                     </div>
-                    <div class="form-group" style="width:30%">
+                    <div class="form-group">
                     <label for="inputPeriod">期間</label>
                     <input type="text" class="form-control" id="inputPeriod" name="period" placeholder="工作期間" value={{.work.Period}}>
                 </div>

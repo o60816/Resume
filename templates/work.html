@@ -3,10 +3,27 @@
 <script>
   function deleteWork(Id)
   {
-      var r = confirm("確定要刪除工作經驗？");
+    var r = confirm("確定要刪除在'" + $("#company" + Id).get(0).innerHTML + "'的工作經驗？");
+    if (r == true) {
+      $.ajax ({
+        url: "/work/" + Id,
+        type: "DELETE",
+        success: function(result){
+          window.location.href = "/";
+        },
+        error:function(error){
+          console.log('Error ${error}');
+        }
+      })
+    }
+  }
+
+  function deleteProject(Id)
+  {
+      var r = confirm("確定要刪除'" + $("#projectName" + Id).get(0).innerHTML + "'?");
       if (r == true) {
         $.ajax ({
-          url: "/work/" + Id,
+          url: "/project/" + Id,
           type: "DELETE",
           success: function(result){
             window.location.href = "/";
@@ -22,7 +39,7 @@
   <div class="row">
     <div class="col-sm-6">
       <h3>
-        <span style="color: rgb(27, 131, 223); font-size: 24px;">{{.Company}}</span>
+        <span id="company{{.Id}}" style="color: rgb(27, 131, 223); font-size: 24px;">{{.Company}}</span>
         <img width="60" height="60" style="float:right" data-no-retina="true" src={{.Logo}} alt="logo.png">
       </h3>
       <h3>
@@ -34,11 +51,15 @@
       <br>
       <a id={{.Id}} onclick=deleteWork(id)>[刪除]</a>
       <a href="/work/update/{{.Id}}">[編輯]</a>
+      <a href="/project/create/{{.Id}}">[新增專案]</a>
     </div>
     <div class="col-sm-6">
         {{range .ProjectList}}
-        <p>專案：</p>
-        <p>{{.ProjectName}}</p>
+        <span>專案：</span>
+        <a style="font-size: 14px" id={{.Id}} onclick=deleteProject(id)>[刪除]</a>
+        <a style="font-size: 14px" href="/project/update/{{.Id}}">[編輯]</a>
+        <br>
+        <p id="projectName{{.Id}}">{{.ProjectName}}</p>
         <p>技術：</p>
         <p>{{.Tech}}</p>
         {{end}}
