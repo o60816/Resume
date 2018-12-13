@@ -98,11 +98,13 @@ func main() {
 	})
 
 	router.GET("/work/create", func(c *gin.Context) {
+		var work Work
 		c.HTML(
 			http.StatusOK,
 			"addWork.html",
 			gin.H{
 				"method":  "POST",
+				"work":    work,
 				"btnName": "新增",
 			},
 		)
@@ -123,7 +125,7 @@ func main() {
 			http.StatusOK,
 			"addWork.html",
 			gin.H{
-				"method":  "PUT",
+				"method":  "PATCH",
 				"work":    work,
 				"btnName": "更新",
 			},
@@ -131,11 +133,11 @@ func main() {
 	})
 
 	var query string
-	router.POST("/work", func(c *gin.Context) {
+	router.POST("/work/:workId", func(c *gin.Context) {
 		if c.PostForm("_method") == "POST" {
 			query = fmt.Sprintf("INSERT INTO work(period, logo, company, position, content) VALUES('%s','%s','%s','%s','%s')", c.PostForm("period"), c.PostForm("logo"), c.PostForm("company"), c.PostForm("position"), c.PostForm("content"))
 		} else {
-			query = fmt.Sprintf("UPDATE work SET period='%s',logo='%s',company='%s',position='%s',content='%s' WHERE id='%s'", c.PostForm("period"), c.PostForm("logo"), c.PostForm("company"), c.PostForm("position"), c.PostForm("content"), c.PostForm("id"))
+			query = fmt.Sprintf("UPDATE work SET period='%s',logo='%s',company='%s',position='%s',content='%s' WHERE id='%s'", c.PostForm("period"), c.PostForm("logo"), c.PostForm("company"), c.PostForm("position"), c.PostForm("content"), c.Param("workId"))
 		}
 
 		if _, err := db.Exec(query); err != nil {
@@ -199,7 +201,7 @@ func main() {
 			http.StatusOK,
 			"addProject.html",
 			gin.H{
-				"method":  "PUT",
+				"method":  "PATCH",
 				"project": project,
 				"btnName": "更新",
 			},

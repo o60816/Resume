@@ -11,9 +11,8 @@
     </head>
     <body>
         <div class="container" style="width:50%;margin-left: 10px">
-            <form action="/work" method="POST">
+            <form action="/work/{{.work.Id}}" method="POST">
                 <input type="hidden" name="_method" value="{{.method}}" />
-                <input type="hidden" name="id" value="{{.work.Id}}" />
                 <div class="form-group">
                     <label for="inputCompany">公司</label>
                     <input type="text" class="form-control" id="inputCompany" name="company" placeholder="公司名稱" value={{.work.Company}}>
