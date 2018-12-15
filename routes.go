@@ -2,7 +2,11 @@
 
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
 
 var router *gin.Engine
 
@@ -11,6 +15,9 @@ func initializeRoutes() {
 	router.Static("/image", "./image")
 
 	// Handle the index route
+	router.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/zh")
+	})
 	router.GET("/en", showMainPage)
 	router.GET("/zh", showMainPage)
 	router.GET("/work/add", showAddWorkPage)
