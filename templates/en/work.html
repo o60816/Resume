@@ -1,40 +1,5 @@
 <!--menu.html-->
 {{range .works}}
-<script>
-  function deleteWork(Id)
-  {
-    var r = confirm("Do you want to delete the work experience at " + $("#company" + Id).get(0).innerHTML);
-    if (r == true) {
-      $.ajax ({
-        url: "/work/" + Id,
-        type: "DELETE",
-        success: function(result){
-          window.location.href = "/en";
-        },
-        error:function(error){
-          console.log('Error ${error}');
-        }
-      })
-    }
-  }
-
-  function deleteProject(Id)
-  {
-      var r = confirm("Do you want to delete '" + $("#projectName" + Id).get(0).innerHTML + "'?");
-      if (r == true) {
-        $.ajax ({
-          url: "/project/" + Id,
-          type: "DELETE",
-          success: function(result){
-            window.location.href = "/en";
-          },
-          error:function(error){
-            console.log('Error ${error}');
-          }
-        })
-      }
-  }
-</script>
 <div class="work">
   <div class="row">
     <div class="col-sm-6">
@@ -49,15 +14,10 @@
       <br>
       <span style="font-size: 18px;">{{.Content}}</span>
       <br>
-      <a id={{.Id}} onclick=deleteWork(id)>[Delete]</a>
-      <a href="/work/update/{{.Id}}">[Edit]</a>
-      <a href="/project/add/{{.Id}}">[Add Project]</a>
     </div>
     <div class="col-sm-6">
         {{range .ProjectList}}
         <span>Project：</span>
-        <a style="font-size: 14px" id={{.Id}} onclick=deleteProject(id)>[Delete]</a>
-        <a style="font-size: 14px" href="/project/update/{{.Id}}">[Edit]</a>
         <br>
         <p id="projectName{{.Id}}">{{.ProjectName}}</p>
         <p>Technique：</p>

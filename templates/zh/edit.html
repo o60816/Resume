@@ -1,0 +1,40 @@
+{{ template "header.html" .}}
+            
+    <body class="container">
+        <div class="row" style="margin-top:10px">
+            <div class="col-xs-4">
+                <div class="card">
+                    <img class ="profile" src="/image/profile.jpg" alt="Scott">
+                    <h1>曹韻偉</h1>
+                    <p class="title">軟體工程師</p>
+                    <p>1990年出生於桃園，巨蟹座AB型</p>
+                    <p>大學就讀私立元智大學資訊管理系，大學時期曾修過系統分析、資料結構、計算機概論等軟體開發的課程</p>
+                    <p>樂於學習、善於分享、勇於挑戰</p>
+                </div>
+            </div>
+            <div class="col-sm-8" stype={margin-top:10px}>
+                <div class="row">
+                    <h3>
+                        工作經歷：
+                        <a href="/work/add">新增</a>
+                        <a href="/edit/en" style="float:right;margin-right:10px">[Eng]</a>
+                        <a href="/edit/zh" style="float:right;margin-right:10px">[中文]</a>
+                    </h3>
+                </div>
+                {{template "editWork.html" .}}
+            </div>
+        </div>
+        <div class="row" style="margin-top: 10px;">
+            <p class="text-center">
+                        <a href="https://github.com/o60816"><i class="fa fa-github"></i></a>
+                        <a href="https://www.linkedin.com/in/scott-tsao-69691011b/"><i class="fa fa-linkedin"></i></a> 
+                        <a href="https://www.facebook.com/profile.php?id=100000318166014"><i class="fa fa-facebook"></i></a> 
+                    </p>
+            <p class="text-center" >
+                <a href="mailto:o60816@gmail.com">
+                    <i class="fa fa-envelope" aria-hidden="true"></i>o60816@gmail.com
+                </a>
+            </p>
+        </div>
+    </body>
+</html>

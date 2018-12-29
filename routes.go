@@ -20,6 +20,8 @@ func initializeRoutes() {
 	})
 	router.GET("/en", showMainPage)
 	router.GET("/zh", showMainPage)
+	router.GET("/edit/en", editPage)
+	router.GET("/edit/zh", editPage)
 	router.GET("/work/add", showAddWorkPage)
 	router.GET("/work/update/:workId", showUpdateWorkPage)
 	router.POST("/work/:workId", workHandler)
@@ -29,5 +31,5 @@ func initializeRoutes() {
 	router.POST("/project/:projectId", projectHandler)
 	router.DELETE("/project/:projectId", projectHandler)
 
-	router.Run(":8080")
+	router.Run(":80")
 }

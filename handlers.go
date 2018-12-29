@@ -55,6 +55,36 @@ func showMainPage(c *gin.Context) {
 	)
 }
 
+func editPage(c *gin.Context) {
+	language = c.Request.URL.String()[6:]
+	router.LoadHTMLGlob(fmt.Sprintf("templates/%s/*", language))
+
+	initUsedTable(language)
+	workList, err := models.GetAllWork(tblWork)
+
+	if err != nil {
+		log.Panic(err)
+		c.JSON(http.StatusOK, gin.H{"Err": err})
+	}
+
+	for i := range workList {
+		projectList, err := models.GetProjectByWorkId(tblProject, workList[i].Id)
+		if err != nil {
+			log.Panic(err)
+			c.JSON(http.StatusOK, gin.H{"Err": err})
+		}
+		workList[i].ProjectList = projectList
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"edit.html",
+		gin.H{
+			"works": workList,
+		},
+	)
+}
+
 func showAddWorkPage(c *gin.Context) {
 	var btnName string
 	if strings.Contains(language, "en") {
@@ -127,7 +157,7 @@ func workHandler(c *gin.Context) {
 	if method == "DELETE" {
 		c.JSON(http.StatusOK, gin.H{"status": "delete successfully"})
 	} else {
-		c.Redirect(http.StatusMovedPermanently, "/"+language)
+		c.Redirect(http.StatusMovedPermanently, "/edit/"+language)
 	}
 }
 
@@ -208,6 +238,6 @@ func projectHandler(c *gin.Context) {
 	if method == "DELETE" {
 		c.JSON(http.StatusOK, gin.H{"status": "delete successfully"})
 	} else {
-		c.Redirect(http.StatusMovedPermanently, "/"+language)
+		c.Redirect(http.StatusMovedPermanently, "/edit/"+language)
 	}
 }
