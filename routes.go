@@ -13,6 +13,7 @@ var router *gin.Engine
 func initializeRoutes() {
 	router = gin.Default()
 	router.Static("/image", "./image")
+	router.Static("/profile", "./profile")
 
 	// Handle the index route
 	router.GET("/", func(c *gin.Context) {
