@@ -11,6 +11,7 @@ import (
 var router *gin.Engine
 
 func initializeRoutes() {
+	gin.SetMode(gin.ReleaseMode)
 	router = gin.Default()
 	router.Static("/image", "./image")
 	router.Static("/profile", "./profile")
