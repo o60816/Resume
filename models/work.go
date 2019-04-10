@@ -16,7 +16,7 @@ type Work struct {
 }
 
 func GetAllWork(tblWork string) ([]Work, error) {
-	rows, err := db.Query("SELECT id, period, logo, company, position, content FROM " + tblWork)
+	rows, err := db.Query("SELECT id, period, logo, company, position, content FROM " + tblWork + " ORDER BY id DESC")
 	defer rows.Close()
 
 	if err != nil {
