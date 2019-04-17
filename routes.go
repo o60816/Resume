@@ -33,5 +33,5 @@ func initializeRoutes() {
 	router.POST("/project/:projectId", projectHandler)
 	router.DELETE("/project/:projectId", projectHandler)
 
-	router.Run(":80")
+	http.Handle("/", router)
 }

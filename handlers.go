@@ -26,7 +26,7 @@ func initUsedTable(language string) {
 }
 
 func showMainPage(c *gin.Context) {
-	language = c.Request.URL.String()[1:]
+	language = c.Request.URL.Path[1:]
 	router.LoadHTMLGlob(fmt.Sprintf("templates/%s/*", language))
 
 	initUsedTable(language)
@@ -56,7 +56,7 @@ func showMainPage(c *gin.Context) {
 }
 
 func editPage(c *gin.Context) {
-	language = c.Request.URL.String()[6:]
+	language = c.Request.URL.Path[6:]
 	router.LoadHTMLGlob(fmt.Sprintf("templates/%s/*", language))
 
 	initUsedTable(language)

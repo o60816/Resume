@@ -1,0 +1,11 @@
+untime: go
+api_version: go1
+
+handlers:
+- url: /.*
+  script: _go_app
+
+env_variables:
+  CLOUDSQL_CONNECTION_NAME: oauthpratice-224306:asia-east1:resume
+  CLOUDSQL_USER: root
+  CLOUDSQL_PASSWORD: '12345678'
