@@ -14,6 +14,7 @@ import (
 var tblWork string
 var tblProject string
 var language string
+var currentUserId int
 
 func initUsedTable(language string) {
 	if language == "en" {
@@ -25,23 +26,31 @@ func initUsedTable(language string) {
 	}
 }
 
-func showMainPage(c *gin.Context) {
-	language = c.Request.URL.String()[1:]
-	router.LoadHTMLGlob(fmt.Sprintf("templates/%s/*", language))
+func showUserPage(c *gin.Context) {
+	userId, _ := strconv.Atoi(c.Param("userId"))
+	router.LoadHTMLGlob("templates/login.html")
+	user, err := models.GetUserById(userId)
+	if err != nil || 0 == user.Id {
+		log.Panic()
+		return
+	}
+
+	router.LoadHTMLGlob(fmt.Sprintf("templates/%s/*", "zh"))
 
 	initUsedTable(language)
-	workList, err := models.GetAllWork(tblWork)
+
+	workList, err := models.GetAllWork(tblWork, userId)
 
 	if err != nil {
 		log.Panic(err)
-		c.JSON(http.StatusOK, gin.H{"Err": err})
+		return
 	}
 
 	for i := range workList {
 		projectList, err := models.GetProjectByWorkId(tblProject, workList[i].Id)
 		if err != nil {
 			log.Panic(err)
-			c.JSON(http.StatusOK, gin.H{"Err": err})
+			return
 		}
 		workList[i].ProjectList = projectList
 	}
@@ -50,28 +59,81 @@ func showMainPage(c *gin.Context) {
 		http.StatusOK,
 		"index.html",
 		gin.H{
+			"user":  user,
 			"works": workList,
 		},
 	)
 }
 
-func editPage(c *gin.Context) {
-	language = c.Request.URL.String()[6:]
-	router.LoadHTMLGlob(fmt.Sprintf("templates/%s/*", language))
+func showLoginPage(c *gin.Context) {
+	if currentUserId != 0 {
+		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/edit/person/%d", currentUserId))
+		return
+	}
 
-	initUsedTable(language)
-	workList, err := models.GetAllWork(tblWork)
+	router.LoadHTMLGlob("templates/login.html")
+	c.HTML(
+		http.StatusOK,
+		"login.html",
+		gin.H{},
+	)
+}
+
+func login(c *gin.Context) {
+	account := c.PostForm("account")
+	password := c.PostForm("password")
+	user, result := models.Login(account, password)
+	if result != true {
+		router.LoadHTMLGlob("templates/login.html")
+		c.HTML(
+			http.StatusOK,
+			"login.html",
+			gin.H{},
+		)
+		return
+	}
+	currentUserId = user.Id
+	c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/edit/person/%d", user.Id))
+}
+
+func logout(c *gin.Context) {
+	currentUserId = 0
+	router.LoadHTMLGlob("templates/login.html")
+	c.HTML(
+		http.StatusOK,
+		"login.html",
+		gin.H{},
+	)
+}
+
+func showEditPage(c *gin.Context) {
+	userId, _ := strconv.Atoi(c.Param("userId"))
+	if currentUserId != userId {
+		currentUserId = 0
+		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/login"))
+		return
+	}
+	user, err := models.GetUserById(userId)
+	if err != nil {
+		log.Panic(err)
+		return
+	}
+
+	router.LoadHTMLGlob(fmt.Sprintf("templates/%s/*", "zh"))
+	initUsedTable("zh")
+
+	workList, err := models.GetAllWork(tblWork, userId)
 
 	if err != nil {
 		log.Panic(err)
-		c.JSON(http.StatusOK, gin.H{"Err": err})
+		return
 	}
 
 	for i := range workList {
 		projectList, err := models.GetProjectByWorkId(tblProject, workList[i].Id)
 		if err != nil {
 			log.Panic(err)
-			c.JSON(http.StatusOK, gin.H{"Err": err})
+			return
 		}
 		workList[i].ProjectList = projectList
 	}
@@ -80,9 +142,48 @@ func editPage(c *gin.Context) {
 		http.StatusOK,
 		"edit.html",
 		gin.H{
+			"user":  user,
 			"works": workList,
 		},
 	)
+}
+
+func showUpdateUserPage(c *gin.Context) {
+	userId, _ := strconv.Atoi(c.Param("userId"))
+	user, err := models.GetUserById(userId)
+	if err != nil {
+		log.Panic(err)
+		return
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"editUser.html",
+		gin.H{
+			"user": user,
+		},
+	)
+}
+
+func userHandler(c *gin.Context) {
+	var user models.User
+	user.Id, _ = strconv.Atoi(c.Param("userId"))
+	user.Name = c.PostForm("name")
+	user.Title = c.PostForm("title")
+	user.Information = c.PostForm("information")
+	user.Introduction = c.PostForm("introduction")
+	user.Motto = c.PostForm("motto")
+	user.Photo = c.PostForm("photo")
+	user.Github = c.PostForm("github")
+	user.Linkedin = c.PostForm("linkedin")
+	user.Facebook = c.PostForm("facebook")
+	user.Email = c.PostForm("email")
+	err := models.UpdateUser(user)
+	if err != nil {
+		log.Panic(err)
+		return
+	}
+	c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/edit/person/%d", user.Id))
 }
 
 func showAddWorkPage(c *gin.Context) {
@@ -93,7 +194,6 @@ func showAddWorkPage(c *gin.Context) {
 		btnName = "新增"
 	}
 	var work models.Work
-
 	c.HTML(
 		http.StatusOK,
 		"addWork.html",
@@ -109,7 +209,7 @@ func showUpdateWorkPage(c *gin.Context) {
 	work, err := models.GetWorkByID(tblWork, c.Param("workId"))
 	if err != nil {
 		log.Panic(err)
-		c.JSON(http.StatusOK, gin.H{"Err": err})
+		return
 	}
 
 	var btnName string
@@ -138,7 +238,7 @@ func workHandler(c *gin.Context) {
 	work.Id, err = strconv.Atoi(c.Param("workId"))
 	if err != nil {
 		log.Panic(err)
-		c.JSON(http.StatusOK, gin.H{"Err": err})
+		return
 	}
 
 	if method != "DELETE" {
@@ -148,17 +248,14 @@ func workHandler(c *gin.Context) {
 		work.Company = c.PostForm("company")
 		work.Position = c.PostForm("position")
 		work.Content = c.PostForm("content")
+		work.UserId = currentUserId
 	}
 
 	if _, err = models.EditWork(tblWork, tblProject, method, work); err != nil {
-		log.Fatal(err)
-		c.JSON(http.StatusOK, gin.H{"Err": err})
+		log.Panic(err)
+		return
 	}
-	if method == "DELETE" {
-		c.JSON(http.StatusOK, gin.H{"status": "delete successfully"})
-	} else {
-		c.Redirect(http.StatusMovedPermanently, "/edit/"+language)
-	}
+	c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/edit/person/%d", currentUserId))
 }
 
 func showAddProjectPage(c *gin.Context) {
@@ -174,7 +271,7 @@ func showAddProjectPage(c *gin.Context) {
 	project.WorkId, err = strconv.Atoi(c.Param("workId"))
 	if err != nil {
 		log.Panic(err)
-		c.JSON(http.StatusOK, gin.H{"Err": err})
+		return
 	}
 	c.HTML(
 		http.StatusOK,
@@ -198,7 +295,7 @@ func showUpdateProjectPage(c *gin.Context) {
 	project, err := models.GetProjectById(tblProject, c.Param("projectId"))
 	if err != nil {
 		log.Panic(err)
-		c.JSON(http.StatusOK, gin.H{"Err": err})
+		return
 	}
 	c.HTML(
 		http.StatusOK,
@@ -218,26 +315,22 @@ func projectHandler(c *gin.Context) {
 	project.Id, err = strconv.Atoi(c.Param("projectId"))
 	if err != nil {
 		log.Panic(err)
-		c.JSON(http.StatusOK, gin.H{"Err": err})
+		return
 	}
 	if method != "DELETE" {
 		method = c.PostForm("_method")
 		project.WorkId, err = strconv.Atoi(c.PostForm("workId"))
 		if err != nil {
 			log.Panic(err)
-			c.JSON(http.StatusOK, gin.H{"Err": err})
+			return
 		}
 		project.ProjectName = c.PostForm("projectName")
 		project.Tech = c.PostForm("tech")
 	}
 	if _, err := models.EditProject(tblProject, method, project); err != nil {
 		log.Panic(err)
-		c.JSON(http.StatusOK, gin.H{"Err": err})
+		return
 	}
 
-	if method == "DELETE" {
-		c.JSON(http.StatusOK, gin.H{"status": "delete successfully"})
-	} else {
-		c.Redirect(http.StatusMovedPermanently, "/edit/"+language)
-	}
+	c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/edit/person/%d", currentUserId))
 }

@@ -11,7 +11,7 @@ var db *sql.DB
 
 func InitializeDB() {
 	var err error
-	db, err = sql.Open("mysql", "root:12345678@tcp(35.234.38.117:3306)/resume?parseTime=true")
+	db, err = sql.Open("mysql", "root:12345678@tcp(127.0.0.1:3306)/resume?parseTime=true")
 	if err != nil {
 		log.Fatal(err)
 	}

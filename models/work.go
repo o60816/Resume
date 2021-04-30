@@ -12,11 +12,12 @@ type Work struct {
 	Company     string    `json:"company"`
 	Position    string    `json:"position"`
 	Content     string    `json:"content"`
-	ProjectList []Project `json:"ProjectList"`
+	ProjectList []Project `json:"projectList"`
+	UserId      int       `json:"userid"`
 }
 
-func GetAllWork(tblWork string) ([]Work, error) {
-	rows, err := db.Query("SELECT id, period, logo, company, position, content FROM " + tblWork + " ORDER BY id DESC")
+func GetAllWork(tblWork string, userId int) ([]Work, error) {
+	rows, err := db.Query(fmt.Sprintf("SELECT id, period, logo, company, position, content FROM %s WHERE user_id='%d' ORDER BY id DESC", tblWork, userId))
 	defer rows.Close()
 
 	if err != nil {
@@ -42,13 +43,13 @@ func GetAllWork(tblWork string) ([]Work, error) {
 
 func GetWorkByID(tblWork string, workId string) (Work, error) {
 	var work Work
-	rows, err := db.Query(fmt.Sprintf("SELECT id, period, logo, company, position, content FROM %s WHERE id=%s", tblWork, workId))
+	rows, err := db.Query(fmt.Sprintf("SELECT id, period, logo, company, position, content, user_id FROM %s WHERE id=%s", tblWork, workId))
 	if err != nil {
 		return work, err
 	}
 
 	for rows.Next() {
-		if err := rows.Scan(&work.Id, &work.Period, &work.Logo, &work.Company, &work.Position, &work.Content); err != nil {
+		if err := rows.Scan(&work.Id, &work.Period, &work.Logo, &work.Company, &work.Position, &work.Content, &work.UserId); err != nil {
 			return work, err
 		}
 	}
@@ -63,7 +64,7 @@ func GetWorkByID(tblWork string, workId string) (Work, error) {
 func EditWork(tblWork string, tblProject string, method string, work Work) (bool, error) {
 	queryList := make([]string, 0)
 	if method == "POST" {
-		queryList = append(queryList, fmt.Sprintf("INSERT INTO %s(period, logo, company, position, content) VALUES('%s','%s','%s','%s','%s')", tblWork, work.Period, work.Logo, work.Company, work.Position, work.Content))
+		queryList = append(queryList, fmt.Sprintf("INSERT INTO %s(period, logo, company, position, content, user_id) VALUES('%s','%s','%s','%s','%s','%d')", tblWork, work.Period, work.Logo, work.Company, work.Position, work.Content, work.UserId))
 	} else if method == "PATCH" {
 		queryList = append(queryList, fmt.Sprintf("UPDATE %s SET period='%s',logo='%s',company='%s',position='%s',content='%s' WHERE id='%d'", tblWork, work.Period, work.Logo, work.Company, work.Position, work.Content, work.Id))
 	} else if method == "DELETE" {
