@@ -14,7 +14,6 @@ import (
 var tblWork string
 var tblProject string
 var language string
-var currentUserId int
 
 func initUsedTable(language string) {
 	if language == "en" {
@@ -66,8 +65,42 @@ func showUserPage(c *gin.Context) {
 }
 
 func showLoginPage(c *gin.Context) {
-	if currentUserId != 0 {
-		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/edit/person/%d", currentUserId))
+	loginUserId, err := c.Cookie("user_id")
+	if err == nil {
+		userId, _ := strconv.Atoi(loginUserId)
+		user, err := models.GetUserById(userId)
+		if err != nil {
+			log.Panic(err)
+			return
+		}
+
+		router.LoadHTMLGlob(fmt.Sprintf("templates/%s/*", "zh"))
+		initUsedTable("zh")
+
+		workList, err := models.GetAllWork(tblWork, userId)
+
+		if err != nil {
+			log.Panic(err)
+			return
+		}
+
+		for i := range workList {
+			projectList, err := models.GetProjectByWorkId(tblProject, workList[i].Id)
+			if err != nil {
+				log.Panic(err)
+				return
+			}
+			workList[i].ProjectList = projectList
+		}
+
+		c.HTML(
+			http.StatusOK,
+			"edit.html",
+			gin.H{
+				"user":  user,
+				"works": workList,
+			},
+		)
 		return
 	}
 
@@ -92,12 +125,12 @@ func login(c *gin.Context) {
 		)
 		return
 	}
-	currentUserId = user.Id
+	c.SetCookie("user_id", strconv.Itoa(user.Id), 0, "/", "", false, true)
 	c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/edit/person/%d", user.Id))
 }
 
 func logout(c *gin.Context) {
-	currentUserId = 0
+	c.SetCookie("user_id", "0", -1, "/", "", false, true)
 	router.LoadHTMLGlob("templates/login.html")
 	c.HTML(
 		http.StatusOK,
@@ -108,9 +141,9 @@ func logout(c *gin.Context) {
 
 func showEditPage(c *gin.Context) {
 	userId, _ := strconv.Atoi(c.Param("userId"))
-	if currentUserId != userId {
-		currentUserId = 0
-		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/login"))
+	loginUserId, err := c.Cookie("user_id")
+	if loginUserId != c.Param("userId") {
+		log.Panic()
 		return
 	}
 	user, err := models.GetUserById(userId)
@@ -231,9 +264,18 @@ func showUpdateWorkPage(c *gin.Context) {
 }
 
 func workHandler(c *gin.Context) {
+	loginUserId, err := c.Cookie("user_id")
+	if err != nil {
+		c.HTML(
+			http.StatusOK,
+			"login.html",
+			gin.H{},
+		)
+		return
+	}
+
 	method := c.Request.Method
 
-	var err error
 	var work models.Work
 	work.Id, err = strconv.Atoi(c.Param("workId"))
 	if err != nil {
@@ -248,14 +290,14 @@ func workHandler(c *gin.Context) {
 		work.Company = c.PostForm("company")
 		work.Position = c.PostForm("position")
 		work.Content = c.PostForm("content")
-		work.UserId = currentUserId
+		work.UserId, _ = strconv.Atoi(loginUserId)
 	}
 
 	if _, err = models.EditWork(tblWork, tblProject, method, work); err != nil {
 		log.Panic(err)
 		return
 	}
-	c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/edit/person/%d", currentUserId))
+	c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/edit/person/%s", loginUserId))
 }
 
 func showAddProjectPage(c *gin.Context) {
@@ -309,8 +351,17 @@ func showUpdateProjectPage(c *gin.Context) {
 }
 
 func projectHandler(c *gin.Context) {
+	loginUserId, err := c.Cookie("user_id")
+	if err != nil {
+		c.HTML(
+			http.StatusOK,
+			"login.html",
+			gin.H{},
+		)
+		return
+	}
+
 	method := c.Request.Method
-	var err error
 	var project models.Project
 	project.Id, err = strconv.Atoi(c.Param("projectId"))
 	if err != nil {
@@ -332,5 +383,5 @@ func projectHandler(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/edit/person/%d", currentUserId))
+	c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/edit/person/%s", loginUserId))
 }
