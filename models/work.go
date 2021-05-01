@@ -32,6 +32,7 @@ func GetAllWork(tblWork string, userId int) ([]Work, error) {
 		if err := rows.Scan(&work.Id, &work.Period, &work.Logo, &work.Company, &work.Position, &work.Content); err != nil {
 			return nil, err
 		}
+		work.UserId = userId
 		workList = append(workList, work)
 	}
 	if err = rows.Err(); err != nil {

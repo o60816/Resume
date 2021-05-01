@@ -297,6 +297,10 @@ func workHandler(c *gin.Context) {
 		log.Panic(err)
 		return
 	}
+	if method == "DELETE" {
+		c.JSON(http.StatusOK, gin.H{})
+		return
+	}
 	c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/edit/person/%s", loginUserId))
 }
 
@@ -382,6 +386,9 @@ func projectHandler(c *gin.Context) {
 		log.Panic(err)
 		return
 	}
-
+	if method == "DELETE" {
+		c.JSON(http.StatusOK, gin.H{})
+		return
+	}
 	c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("/edit/person/%s", loginUserId))
 }

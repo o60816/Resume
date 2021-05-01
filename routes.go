@@ -41,7 +41,7 @@ func initializeRoutes() {
 	router.POST("/project/:projectId", projectHandler)
 	router.DELETE("/project/:projectId", projectHandler)
 
-	if err := router.Run(":80"); err != nil {
+	if err := router.Run(":8081"); err != nil {
 		log.Fatal(err)
 	}
 }

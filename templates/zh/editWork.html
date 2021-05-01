@@ -9,10 +9,7 @@
         url: "/work/" + Id,
         type: "DELETE",
         success: function(result){
-          window.location.href = "/edit/zh";
-        },
-        error:function(error){
-          console.log('Error ${error}');
+          window.location.href = "/edit/person/"+$("#inputuserid").get(0).value;
         }
       })
     }
@@ -26,10 +23,7 @@
           url: "/project/" + Id,
           type: "DELETE",
           success: function(result){
-            window.location.href = "/edit/zh";
-          },
-          error:function(error){
-            console.log('Error ${error}');
+            window.location.href = "/edit/person/"+$("#inputuserid").get(0).value;
           }
         })
       }
@@ -49,9 +43,10 @@
       <br>
       <span style="font-size: 18px;">{{.Content}}</span>
       <br>
-      <a id={{.Id}} name={{.UserId}} onclick=deleteWork(id,name)>[刪除]</a>
+      <a id={{.Id}} onclick="deleteWork(id)">[刪除]</a>
       <a href="/work/update/{{.Id}}">[編輯]</a>
       <a href="/project/add/{{.Id}}">[新增專案]</a>
+      <input type="hidden" id="inputuserid" value="{{.UserId}}" />
     </div>
     <div class="col-sm-6">
         {{range .ProjectList}}
