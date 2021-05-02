@@ -3,13 +3,13 @@
         <div class="row" style="margin-top:10px">
             <div class="col-xs-4">
                 <div class="card">
+                    <a href="/user/update/{{.user.Id}}" style="float:right;margin-right:10px">[編輯]</a>
                     <img class ="profile" src="{{.user.Photo}}" alt="Photo.png">
                     <h1>{{.user.Name}}</h1>
                     <p class="title">{{.user.Title}}</p>
                     <p>{{.user.Information}}</p>
                     <p>{{.user.Introduction}}</p>
                     <p>{{.user.Motto}}</p>
-                    <a href="/user/update/{{.user.Id}}" style="float:right;margin-right:10px">[編輯]</a>
                 </div>
             </div>
             <div class="col-sm-8" style="margin-top:10px">
