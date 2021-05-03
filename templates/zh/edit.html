@@ -4,7 +4,7 @@
             <div class="col-xs-4">
                 <div class="card">
                     <a href="/user/update/{{.user.Id}}" style="float:right;margin-right:10px">[編輯]</a>
-                    <img class ="profile" src="{{.user.Photo}}" alt="Photo.png">
+                    <img class ="profile" src="{{.user.Photo}}">
                     <h1>{{.user.Name}}</h1>
                     <p class="title">{{.user.Title}}</p>
                     <p>{{.user.Information}}</p>
@@ -25,10 +25,10 @@
         </div>
         <div class="row" style="margin-top: 10px;">
             <p class="text-center">
-                        <a href="{{.user.Github}}"><i class="fa fa-github"></i></a>
-                        <a href="{{.user.Linkedin}}"><i class="fa fa-linkedin"></i></a> 
-                        <a href="{{.user.Facebook}}"><i class="fa fa-facebook"></i></a> 
-                    </p>
+                <a href="{{.user.Github}}"><i class="fa fa-github"></i></a>
+                <a href="{{.user.Linkedin}}"><i class="fa fa-linkedin"></i></a> 
+                <a href="{{.user.Facebook}}"><i class="fa fa-facebook"></i></a> 
+            </p>
             <p class="text-center" >
                 <a href="mailto:{{.user.Email}}">
                     <i class="fa fa-envelope" aria-hidden="true"></i>{{.user.Email}}
